@@ -12,12 +12,30 @@ spec:
       app: vk-api
   template:
     metadata:
+      annotations:
+#        sidecar.istio.io/inject: 'false'
       labels:
         app: vk-api
     spec:
       containers:
       - name: vk-api
         image: belenot/vk-api
+        livenessProbe:
+          periodSeconds: 1
+          httpGet:
+            path: /health
+            port: 8080
+        env:
+        - name: vkAppId
+          valueFrom:
+            secretKeyRef:
+              name: vk-api
+              key: vkAppId
+        - name: vkToken
+          valueFrom:
+            secretKeyRef:
+              name: vk-api
+              key: vkToken
         ports:
         - containerPort: 8080
 ---
@@ -40,3 +58,11 @@ metadata:
 spec:
   prefix: /vk-api/
   service: http://vk-api.default
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vk-api
+stringData:
+  vkAppId: 
+  vkToken: 
