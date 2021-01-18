@@ -1,19 +1,13 @@
 package com.belenot.service.vk
 
 import com.sksamuel.hoplite.ConfigLoader
-import com.vk.api.sdk.client.VkApiClient
-import com.vk.api.sdk.client.actors.ServiceActor
-import com.vk.api.sdk.httpclient.HttpTransportClient
-import com.vk.api.sdk.objects.users.Fields
+import khttp.get
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.lang.Exception
-import java.sql.Connection
-import java.sql.DriverManager
-import java.util.*
 
 val logger = LoggerFactory.getLogger("main")
 
@@ -22,6 +16,9 @@ fun main() {
     logger.info("VK API.")
 
     val config = ConfigLoader().loadConfigOrThrow<Config>("/application.yml")
+    runBlocking {
+        checkKubernetesSidecar(config.sidecarHealthCheck.port, config.sidecarHealthCheck.path)
+    }
     val usersService = UsersService(config.vkApi, config.db)
     val usersScrapeJob = UsersScrapeJob(config.db, config.usersScrape, usersService)
     val server = Server(config.server, usersService, usersScrapeJob)
@@ -32,4 +29,16 @@ fun main() {
     server.start()
 
     logger.info("Exit application...")
+}
+
+suspend fun checkKubernetesSidecar(port: Int, path: String) {
+    var sc = 0
+    while (sc < 200 || sc > 200) {
+        try {
+            sc = get("http://localhost:${port}${path}").statusCode
+        } catch (exc: Exception) {
+            logger.info("Got $sc from sidecar health check. Try again...")
+            delay(3000)
+        }
+    }
 }

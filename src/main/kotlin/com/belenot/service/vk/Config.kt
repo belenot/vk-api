@@ -19,9 +19,16 @@ data class UsersScrapeConfig(
     val interval: Int
 )
 
+data class SidecarHealthCheckConfig(
+    val port: Int,
+    val path: String,
+    val enabled: Boolean
+)
+
 data class Config(
     val vkApi: VkApiConfig,
     val db: DbConfig,
     val server: ServerConfig,
-    val usersScrape: UsersScrapeConfig
+    val usersScrape: UsersScrapeConfig,
+    val sidecarHealthCheck: SidecarHealthCheckConfig
 )

@@ -10,3 +10,7 @@ db:
   password: ''
 server:
   port: 8080
+sidecarHealthCheck:
+  port: 15021
+  path: /healthz/ready
+  enabled: false
