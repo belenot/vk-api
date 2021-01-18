@@ -10,3 +10,8 @@ export vkAppId=1234
 ./gradlew shadowJar
 java -jar build/libs/vk-api-all.jar
 ```
+
+## Docker build and push
+```shell script
+./gradlew shadowJar dockerBuild dockerPush
+```
