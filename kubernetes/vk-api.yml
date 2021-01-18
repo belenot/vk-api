@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vk-api
+  labels:
+    app: vk-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vk-api
+  template:
+    metadata:
+      labels:
+        app: vk-api
+    spec:
+      containers:
+      - name: vk-api
+        image: belenot/vk-api
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vk-api
+spec:
+  selector:
+    app: vk-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+---
+apiVersion: getambassador.io/v2
+kind:  Mapping
+metadata:
+  name:  vk-api
+spec:
+  prefix: /vk-api/
+  service: http://vk-api.default

@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.3.72'
     id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'com.bmuschko.docker-remote-api' version '6.7.0'
 }
 
 group 'com.belenot.service.vk'
@@ -41,4 +42,23 @@ jar {
     manifest {
         attributes "Main-Class": "com.belenot.service.vk.AppKt"
     }
+}
+
+shadowJar.doLast {
+    copy {
+        from("build/libs/vk-api-all.jar")
+        into("docker/")
+        rename { "app.jar" }
+    }
+}
+
+import com.bmuschko.gradle.docker.tasks.image.*
+
+task buildImage(type: DockerBuildImage) {
+    inputDir = file('docker/')
+    images.add('belenot/vk-api:latest')
+}
+
+task pushImage(type: DockerPushImage) {
+    images.add('belenot/vk-api:latest')
 }
