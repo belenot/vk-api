@@ -7,16 +7,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.lang.Exception
 
 val logger = LoggerFactory.getLogger("main")
 
-fun main() {
-
+fun main(args: Array<String>) {
     logger.info("VK API.")
 
-    val config = ConfigLoader().loadConfigOrThrow<Config>("/application.yml")
-    runBlocking {
+    val config = if (args.size == 0)
+        ConfigLoader().loadConfigOrThrow<Config>("/application.yml")
+    else
+        ConfigLoader().loadConfigOrThrow<Config>(args.map{ File(it) })
+
+    if (config.sidecarHealthCheck.enabled) runBlocking {
         checkKubernetesSidecar(config.sidecarHealthCheck.port, config.sidecarHealthCheck.path)
     }
     val usersService = UsersService(config.vkApi, config.db)

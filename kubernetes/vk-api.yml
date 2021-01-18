@@ -17,9 +17,16 @@ spec:
       labels:
         app: vk-api
     spec:
+      volumes:
+      - name: vk-api
+        configMap:
+          name: vk-api
       containers:
       - name: vk-api
         image: belenot/vk-api
+        volumeMounts:
+        - name: vk-api
+          mountPath: /etc/vk-api/
         livenessProbe:
           periodSeconds: 1
           httpGet:
@@ -66,3 +73,26 @@ metadata:
 stringData:
   vkAppId: 
   vkToken: 
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vk-api
+data:
+  application.yml: |-
+    vkApi:
+      token: ${vkToken}
+      appId: ${vkAppId}
+    usersScrape:
+      interval: 10
+    db:
+      #  url: jdbc:postgresql://localhost/vk_api_client
+      url: jdbc:h2:mem:vk_api_client;INIT=RUNSCRIPT FROM 'classpath:/script.sql'
+      username: sa
+      password: ''
+    server:
+      port: 8080
+    sidecarHealthCheck:
+      port: 15021
+      path: /healthz/ready
+      enabled: true
