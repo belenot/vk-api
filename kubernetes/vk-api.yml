@@ -86,10 +86,10 @@ data:
     usersScrape:
       interval: 10
     db:
-      #  url: jdbc:postgresql://localhost/vk_api_client
-      url: jdbc:h2:mem:vk_api_client;INIT=RUNSCRIPT FROM 'classpath:/script.sql'
-      username: sa
-      password: ''
+      url: jdbc:postgresql://postgresql.alpha.belenot.com/vk_api_client
+      # url: jdbc:h2:mem:vk_api_client;INIT=RUNSCRIPT FROM 'classpath:/script.sql'
+      username: vk_api_client
+      password: vk_api_client
     server:
       port: 8080
     sidecarHealthCheck:
