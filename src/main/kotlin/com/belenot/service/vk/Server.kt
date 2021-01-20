@@ -48,7 +48,7 @@ fun Application.module(usersService: UsersService, usersScrapeJob: UsersScrapeJo
         }
 
         get("/users-online") {
-            val startDate =  Instant.ofEpochSecond(call.parameters["start-date"]?.toLong() ?: Instant.now().epochSecond)
+            val startDate =  Instant.ofEpochSecond(call.parameters["start-date"]?.toLong() ?: Instant.now().epochSecond - 86_400)
             val endDate = Instant.ofEpochSecond(call.parameters["end-date"]?.toLong() ?: Instant.now().epochSecond)
             call.respond(usersService.getSavedUsers(startDate, endDate))
         }
