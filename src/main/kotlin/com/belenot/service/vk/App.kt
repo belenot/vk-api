@@ -16,10 +16,10 @@ fun main(args: Array<String>) {
     logger.info("VK API.")
 
     val config = if (args.size == 0)
-        ConfigLoader().loadConfigOrThrow<Config>("/application.yml")
+        ConfigLoader().loadConfigOrThrow<Config>("/application.yml").also { logger.info("Load default config from classpath.") }
     else
-        ConfigLoader().loadConfigOrThrow<Config>(args.map{ File(it) })
-
+        ConfigLoader().loadConfigOrThrow<Config>(args.map{ File(it) }).also { logger.info("Load config from ${args.map{ it }.joinToString(",")}") }
+    logConfig(config)
     if (config.sidecarHealthCheck.enabled) runBlocking {
         checkKubernetesSidecar(config.sidecarHealthCheck.port, config.sidecarHealthCheck.path)
     }
@@ -45,4 +45,20 @@ suspend fun checkKubernetesSidecar(port: Int, path: String) {
             delay(3000)
         }
     }
+}
+
+fun logConfig(config: Config) {
+    val msg = """
+        
+        VK Client:
+          appId=${config.vkApi.appId}
+        Database:
+          url=${config.db.url}
+          username=${config.db.username}
+        Sidecar health check:
+          port=${config.sidecarHealthCheck.port}
+          path=${config.sidecarHealthCheck.path}
+          enabled=${config.sidecarHealthCheck.enabled}
+    """.trimIndent()
+    logger.info(msg)
 }
